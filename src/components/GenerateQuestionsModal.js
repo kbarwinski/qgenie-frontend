@@ -53,19 +53,19 @@ function GenerateQuestionsModal({ interview, onClose }) {
   const isFormValid = character && seniority;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col overflow-scroll lg:flex-row justify-center items-center">
-      <div className="bg-white rounded-lg p-6 h-4/5 w-1/4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col lg:flex-row justify-center items-center p-4 overflow-auto">
+      <div className="bg-white rounded-lg p-6 w-full lg:w-1/3 mb-4 lg:mb-0 lg:mr-4">
         <h2 className="text-xl font-bold mb-4">
           {interview?.candidateCredentials} - {interview?.jobTitle}
         </h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block mb-2">Interview Character</label>
             <select
               value={character}
               onChange={(e) => setCharacter(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
             >
               <option value="">Select character</option>
               <option value="HR">HR Prescreening</option>
@@ -78,7 +78,7 @@ function GenerateQuestionsModal({ interview, onClose }) {
             <select
               value={seniority}
               onChange={(e) => setSeniority(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
             >
               <option value="">Select seniority</option>
               <option value="Junior">Junior</option>
@@ -93,16 +93,16 @@ function GenerateQuestionsModal({ interview, onClose }) {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
               rows="3"
             ></textarea>
           </div>
           <button
             type="submit"
             disabled={!isFormValid || isSubmitting}
-            className={`w-full py-2 px-4 rounded ${
+            className={`w-full py-2 px-4 rounded transition-all ${
               isFormValid && !isSubmitting
-                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                ? "bg-blue-500 hover:bg-blue-900 text-white"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
@@ -111,24 +111,28 @@ function GenerateQuestionsModal({ interview, onClose }) {
         </form>
         <button
           onClick={onClose}
-          className="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
+          className="mt-4 w-full transition-all bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
         >
           Close
         </button>
       </div>
 
-      <div className="bg-white rounded-lg p-6 h-4/5 w-3/5">
       {isLoading ? (
-          <p>Loading last message...</p>
-        ) : lastMessage ? (
-          <div className="mb-4 p-3 bg-gray-100 rounded overflow-scroll">
-            <h3 className="font-bold">Last Generated Message:</h3>
-            <p>{lastMessage.response}</p>
+        <p>Loading last message...</p>
+      ) : lastMessage ? (
+        <div className="bg-white rounded-lg p-6 w-full lg:w-2/3 max-h-[80vh] overflow-auto">
+          <div className="mb-4 p-3 bg-gray-100 rounded">
+            <h3 className="font-bold mb-2">Last questions set:</h3>
+            {lastMessage.response.split("\n").map((line, index) => (
+              <p key={index} className="mb-2">
+                {line.trim() && `${line.trim()}`}
+              </p>
+            ))}
           </div>
-        ) : (
-          <p className="mb-4">No previous messages for this interview.</p>
-        )}
-      </div>
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
