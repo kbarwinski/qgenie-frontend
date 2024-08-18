@@ -4,17 +4,23 @@ import { getLastInterviewMessage, createMessage } from "../api/api";
 function GenerateQuestionsModal({ interview, onClose }) {
   const [character, setCharacter] = useState("");
   const [seniority, setSeniority] = useState("");
-  const [notes, setNotes] = useState("");
-  const [lastMessage, setLastMessage] = useState(null);
+  const [textareaContent, setTextareaContent] = useState("");
+  const [isOutputMode, setIsOutputMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalClassName, setModalClassName] = useState("bg-white rounded-lg p-6 w-full max-w-4xl border-solid border-4 transition-colors duration-300 border-blue-300");
+  const [copyMessage, setCopyMessage] = useState("");
 
   useEffect(() => {
     const fetchLastMessage = async () => {
       setIsLoading(true);
       try {
         const message = await getLastInterviewMessage(interview.refId);
-        setLastMessage(message);
+        if (message) {
+          setTextareaContent(message.response);
+          setIsOutputMode(true);
+          setModalClassName("bg-white rounded-lg p-6 w-full max-w-4xl border-solid border-4 transition-colors duration-300 border-orange-600");
+        }
       } catch (error) {
         console.error("Error fetching last message:", error);
       } finally {
@@ -35,14 +41,14 @@ function GenerateQuestionsModal({ interview, onClose }) {
         candidate: interview.candidateCredentials,
         interviewCharacter: character,
         jobSeniority: seniority,
-        notes: notes,
+        notes: textareaContent,
       };
       const result = await createMessage(interview.refId, messageData);
-      setLastMessage(result);
-      // Reset form fields
+      setTextareaContent(result.response);
+      setIsOutputMode(true);
+      setModalClassName("bg-white rounded-lg p-6 w-full max-w-4xl border-solid border-2 transition-colors duration-300 border-orange-500");
       setCharacter("");
       setSeniority("");
-      setNotes("");
     } catch (error) {
       console.error("Error in message creation process:", error);
     } finally {
@@ -50,89 +56,112 @@ function GenerateQuestionsModal({ interview, onClose }) {
     }
   };
 
-  const isFormValid = character && seniority;
+  const handleNewQuestions = () => {
+    setIsOutputMode(false);
+    setTextareaContent("");
+    setModalClassName("bg-white rounded-lg p-6 w-full max-w-4xl border-solid border-2 transition-colors duration-300 border-blue-300");
+  };
+
+  const copyToClipboard = () => {
+    if (isOutputMode) {
+      navigator.clipboard.writeText(textareaContent).then(() => {
+        setCopyMessage("Questions copied to clipboard!");
+        setTimeout(() => setCopyMessage(""), 3000); // Clear message after 3 seconds
+      });
+    }
+  };
+
+  const isFormValid = character && seniority && (!isOutputMode || textareaContent.trim() !== "");
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col lg:flex-row justify-center items-center p-4 overflow-auto">
-      <div className="bg-white rounded-lg p-6 w-full lg:w-1/3 mb-4 lg:mb-0 lg:mr-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 overflow-auto">
+      <div className={modalClassName}>
         <h2 className="text-xl font-bold mb-4">
           {interview?.candidateCredentials} - {interview?.jobTitle}
         </h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block mb-2">Interview Character</label>
-            <select
-              value={character}
-              onChange={(e) => setCharacter(e.target.value)}
-              className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
-            >
-              <option value="">Select character</option>
-              <option value="HR">HR Prescreening</option>
-              <option value="Technical">Technical Interview</option>
-              <option value="Manager">Director/Manager Interview</option>
-            </select>
+        <form onSubmit={handleSubmit} className="mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block mb-2">Interview Character</label>
+              <select
+                value={character}
+                onChange={(e) => setCharacter(e.target.value)}
+                className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
+              >
+                <option value="">Select character</option>
+                <option value="HR">HR Prescreening</option>
+                <option value="Technical">Technical Interview</option>
+                <option value="Manager">Director/Manager Interview</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-2">Job Seniority</label>
+              <select
+                value={seniority}
+                onChange={(e) => setSeniority(e.target.value)}
+                className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
+              >
+                <option value="">Select seniority</option>
+                <option value="Junior">Junior</option>
+                <option value="Associate">Associate</option>
+                <option value="Mid">Mid</option>
+                <option value="Senior">Senior</option>
+                <option value="C-Level">C-Level</option>
+              </select>
+            </div>
           </div>
           <div className="mb-4">
-            <label className="block mb-2">Job Seniority</label>
-            <select
-              value={seniority}
-              onChange={(e) => setSeniority(e.target.value)}
-              className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
-            >
-              <option value="">Select seniority</option>
-              <option value="Junior">Junior</option>
-              <option value="Associate">Associate</option>
-              <option value="Mid">Mid</option>
-              <option value="Senior">Senior</option>
-              <option value="C-Level">C-Level</option>
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="block mb-2">Additional Notes</label>
+            <label className="block mb-2">
+              {isOutputMode ? "Generated Questions" : "Additional Notes"}
+            </label>
             <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              value={textareaContent}
+              onChange={(e) => setTextareaContent(e.target.value)}
+              onClick={copyToClipboard}
               className="w-full p-2 border rounded hover:bg-gray-300 transition-all"
-              rows="3"
+              rows="10"
+              readOnly={isOutputMode}
             ></textarea>
           </div>
-          <button
-            type="submit"
-            disabled={!isFormValid || isSubmitting}
-            className={`w-full py-2 px-4 rounded transition-all ${
-              isFormValid && !isSubmitting
-                ? "bg-blue-500 hover:bg-blue-900 text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            {isSubmitting ? "Generating..." : "Generate Questions"}
-          </button>
+          <div className="flex justify-between">
+            <button
+              type="button"
+              disabled={!isOutputMode}
+              onClick={handleNewQuestions}
+              className={`py-2 px-4 rounded-lg transition-all ${
+                isOutputMode
+                  ? "bg-blue-500 hover:bg-blue-900 text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              New Questions
+            </button>
+            <button
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+              className={`py-2 px-4 rounded-lg transition-all ${
+                isFormValid && !isSubmitting && !isOutputMode
+                  ? "bg-orange-500 hover:bg-orange-900 text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              {isSubmitting ? "Generating..." : "Generate Questions"}
+            </button>
+          </div>
         </form>
+
+        {copyMessage && (
+          <div className="text-green-600 mb-4 text-center">{copyMessage}</div>
+        )}
+
         <button
           onClick={onClose}
-          className="mt-4 w-full transition-all bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
+          className="w-full transition-all bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
         >
           Close
         </button>
       </div>
-
-      {isLoading ? (
-        <p>Loading last message...</p>
-      ) : lastMessage ? (
-        <div className="bg-white rounded-lg p-6 w-full lg:w-2/3 max-h-[80vh] overflow-auto">
-          <div className="mb-4 p-3 bg-gray-100 rounded">
-            <h3 className="font-bold mb-2">Questions set:</h3>
-            {lastMessage.response.split("\n").map((line, index) => (
-              <p key={index} className="mb-2">
-                {line.trim() && `${line.trim()}`}
-              </p>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <></>
-      )}
     </div>
   );
 }
