@@ -5,7 +5,7 @@ function GenerateQuestionsModal({ interview, onClose }) {
   const [character, setCharacter] = useState("");
   const [seniority, setSeniority] = useState("");
   const [notes, setNotes] = useState("");
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -20,7 +20,7 @@ function GenerateQuestionsModal({ interview, onClose }) {
         seniority,
         notes
       );
-      setQuestions(result);
+      setQuestions(result.response);
     } catch (error) {
       console.error("Error in question generation process:", error);
     } finally {
