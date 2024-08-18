@@ -14,7 +14,7 @@ function App() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">QGenie</h1>
+      <img src="img/qgenie.svg" alt="QGenie Logo" className="w-128 h-24" />
       <InterviewList
         interviews={dummyInterviews}
         onGenerateQuestions={handleGenerateQuestions}

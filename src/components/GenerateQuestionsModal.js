@@ -122,7 +122,7 @@ function GenerateQuestionsModal({ interview, onClose }) {
       ) : lastMessage ? (
         <div className="bg-white rounded-lg p-6 w-full lg:w-2/3 max-h-[80vh] overflow-auto">
           <div className="mb-4 p-3 bg-gray-100 rounded">
-            <h3 className="font-bold mb-2">Last questions set:</h3>
+            <h3 className="font-bold mb-2">Questions set:</h3>
             {lastMessage.response.split("\n").map((line, index) => (
               <p key={index} className="mb-2">
                 {line.trim() && `${line.trim()}`}
