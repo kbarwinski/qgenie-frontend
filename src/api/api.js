@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://your-api-base-url";
+const API_BASE_URL = "http://localhost:5020";
 
 export const getOrCreateInterview = async (interviewId) => {
   try {
