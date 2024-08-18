@@ -1,41 +1,64 @@
-import React, { useState } from "react";
-import { getOrCreateInterview, generateQuestions } from "../api/api";
+import React, { useState, useEffect } from "react";
+import { getLastInterviewMessage, createMessage } from "../api/api";
 
 function GenerateQuestionsModal({ interview, onClose }) {
   const [character, setCharacter] = useState("");
   const [seniority, setSeniority] = useState("");
   const [notes, setNotes] = useState("");
-  const [questions, setQuestions] = useState("");
+  const [lastMessage, setLastMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchLastMessage = async () => {
+      setIsLoading(true);
+      try {
+        const message = await getLastInterviewMessage(interview.refId);
+        setLastMessage(message);
+      } catch (error) {
+        console.error("Error fetching last message:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLastMessage();
+  }, [interview.refId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
-      await getOrCreateInterview(interview);
-
-      const result = await generateQuestions(
-        interview,
-        character,
-        seniority,
-        notes
-      );
-      setQuestions(result.response);
+      const messageData = {
+        jobTitle: interview.jobTitle,
+        jobDescription: interview.jobDescription,
+        candidate: interview.candidateCredentials,
+        interviewCharacter: character,
+        jobSeniority: seniority,
+        notes: notes,
+      };
+      const result = await createMessage(interview.refId, messageData);
+      setLastMessage(result);
+      // Reset form fields
+      setCharacter("");
+      setSeniority("");
+      setNotes("");
     } catch (error) {
-      console.error("Error in question generation process:", error);
+      console.error("Error in message creation process:", error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const isFormValid = character && seniority;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col overflow-scroll lg:flex-row justify-center items-center">
+      <div className="bg-white rounded-lg p-6 h-4/5 w-1/4">
         <h2 className="text-xl font-bold mb-4">
           {interview?.candidateCredentials} - {interview?.jobTitle}
         </h2>
+        
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block mb-2">Interview Character</label>
@@ -76,32 +99,35 @@ function GenerateQuestionsModal({ interview, onClose }) {
           </div>
           <button
             type="submit"
-            disabled={!isFormValid || isLoading}
+            disabled={!isFormValid || isSubmitting}
             className={`w-full py-2 px-4 rounded ${
-              isFormValid && !isLoading
+              isFormValid && !isSubmitting
                 ? "bg-blue-500 hover:bg-blue-600 text-white"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            {isLoading ? "Generating..." : "Generate Questions"}
+            {isSubmitting ? "Generating..." : "Generate Questions"}
           </button>
         </form>
-        {questions.length > 0 && (
-          <div className="mt-4">
-            <h3 className="font-bold mb-2">Generated Questions:</h3>
-            <ul className="list-disc pl-5">
-              {questions.map((question, index) => (
-                <li key={index}>{question}</li>
-              ))}
-            </ul>
-          </div>
-        )}
         <button
           onClick={onClose}
           className="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
         >
           Close
         </button>
+      </div>
+
+      <div className="bg-white rounded-lg p-6 h-4/5 w-3/5">
+      {isLoading ? (
+          <p>Loading last message...</p>
+        ) : lastMessage ? (
+          <div className="mb-4 p-3 bg-gray-100 rounded overflow-scroll">
+            <h3 className="font-bold">Last Generated Message:</h3>
+            <p>{lastMessage.response}</p>
+          </div>
+        ) : (
+          <p className="mb-4">No previous messages for this interview.</p>
+        )}
       </div>
     </div>
   );

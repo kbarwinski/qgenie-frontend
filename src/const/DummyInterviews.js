@@ -1,6 +1,6 @@
 export const dummyInterviews = [
   {
-    id: 1,
+    refId: 1,
     jobTitle: "Senior Software Engineer",
     jobDescription:
       "Experienced developer with strong skills in React and Node.js",
@@ -8,7 +8,7 @@ export const dummyInterviews = [
     dueDate: "2023-09-01",
   },
   {
-    id: 2,
+    refId: 2,
     jobTitle: "Product Manager",
     jobDescription: "Strategic thinker with experience in Agile methodologies",
     candidateCredentials: "Jane Smith, 5 years of experience",
