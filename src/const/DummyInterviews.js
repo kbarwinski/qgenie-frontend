@@ -14,4 +14,20 @@ export const dummyInterviews = [
     candidateCredentials: "Jane Smith, 5 years of experience",
     dueDate: "2023-08-25",
   },
+  {
+    refId: 3,
+    jobTitle: "Data Analyst",
+    jobDescription:
+      "Analytical mind with expertise in SQL and data visualization",
+    candidateCredentials: "Alex Johnson, 3 years of experience",
+    dueDate: "2023-08-20",
+  },
+  {
+    refId: 4,
+    jobTitle: "UX Designer",
+    jobDescription:
+      "Creative designer with a focus on user experience and usability",
+    candidateCredentials: "Emily Brown, 4 years of experience",
+    dueDate: "2023-08-15",
+  },
 ];
