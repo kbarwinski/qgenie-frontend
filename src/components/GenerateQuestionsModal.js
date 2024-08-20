@@ -76,9 +76,14 @@ function GenerateQuestionsModal({ interview, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 overflow-auto">
       <div className={modalClassName}>
-        <h2 className="text-xl font-bold mb-4">
-          {interview?.candidateCredentials} - {interview?.jobTitle}
-        </h2>
+      <div className="relative">
+          <h2 className="text-xl font-bold mb-4">
+            {interview?.credentials} - {interview?.jobTitle}
+          </h2>
+          <div className="absolute top-0 right-0  text-red-500 text-xs px-2 py-1 rounded">
+            *Generated in whole or part with Generative AI
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="mb-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

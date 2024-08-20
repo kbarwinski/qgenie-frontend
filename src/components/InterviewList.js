@@ -11,7 +11,7 @@ function InterviewList({ interviews, onGenerateQuestions }) {
           <h2 className="text-xl font-semibold">{interview.jobTitle}</h2>
           <p className="text-gray-600">{interview.jobDescription}</p>
           <p className="text-gray-600">
-            Candidate: {interview.candidateCredentials}
+            Candidate: {interview.credentials}
           </p>
           <p className="text-gray-600">
             Due Date: {new Date(interview.dueDate).toLocaleDateString()}
