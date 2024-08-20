@@ -74,7 +74,7 @@ function GenerateQuestionsModal({ interview, onClose }) {
   const isFormValid = character && seniority && (!isOutputMode || textareaContent.trim() !== "");
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 overflow-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-75 transition-all animate-fadein duration-250 flex justify-center items-center p-4 overflow-auto">
       <div className={modalClassName}>
       <div className="relative">
           <h2 className="text-xl font-bold mb-4">
